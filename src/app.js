@@ -68,6 +68,64 @@ async function viewAllDepartments() {
     }
 }
 
+async function addDepartment() {
+    const { departmentName } = await inquirer.prompt([
+        {
+            name: 'departmentName',
+            type: 'input',
+            message: 'What is the name of the department?',
+        }
+    ]);
+
+    const sql = `INSERT INTO department (name) VALUES (?)`;
+    try {
+        await executeQuery(sql, [departmentName]);
+        console.log(`Added ${departmentName} to the database`);
+    } catch (error) {
+        console.error('Error adding department:', error);
+    } finally {
+        showMainMenu();
+    }
+}
+
+async function addRole() {
+    const departments = await executeQuery(`SELECT id, name FROM department`);
+    const departmentChoices = departments.map(({ id, name }) => ({
+        name: name,
+        value: id
+    }));
+
+    const { title, salary, departmentId } = await inquirer.prompt([
+        {
+            name: 'title',
+            type: 'input',
+            message: 'What is the title of the role?',
+        },
+        {
+            name: 'salary',
+            type: 'input',
+            message: 'What is the salary of the role?',
+            validate: value => !isNaN(parseFloat(value)) && isFinite(value) ? true : 'Please enter a valid number'
+        },
+        {
+            name: 'departmentId',
+            type: 'list',
+            message: 'Which department does this role belong to?',
+            choices: departmentChoices
+        }
+    ]);
+
+    const sql = `INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`;
+    try {
+        await executeQuery(sql, [title, salary, departmentId]);
+        console.log(`Added the role ${title} with a salary of ${salary} to the department ID ${departmentId}`);
+    } catch (error) {
+        console.error('Error adding role:', error);
+    } finally {
+        showMainMenu();
+    }
+}
+
 async function viewAllRoles() {
     console.log('Functionality to view all roles');
     showMainMenu();
