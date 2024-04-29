@@ -127,13 +127,29 @@ async function addRole() {
 }
 
 async function viewAllRoles() {
-    console.log('Functionality to view all roles');
-    showMainMenu();
+    const sql = `SELECT id, title, salary, department_id FROM role`;
+    try {
+        const roles = await executeQuery(sql);
+        console.log("\nRoles:");
+        console.table(roles);
+    } catch (error) {
+        console.error('Error fetching roles:', error);
+    } finally {
+        showMainMenu();
+    }
 }
 
 async function viewAllEmployees() {
-    console.log('Functionality to view all employees');
-    showMainMenu();
+    const sql = `SELECT id, first_name, last_name, role_id, manager_id FROM employee`;
+    try {
+        const employees = await executeQuery(sql);
+        console.log("\nEmployees:");
+        console.table(employees);
+    } catch (error) {
+        console.error('Error fetching employees:', error);
+    } finally {
+        showMainMenu();
+    }
 }
 
 async function addEmployee() {
