@@ -153,9 +153,49 @@ async function viewAllEmployees() {
 }
 
 async function addEmployee() {
-    console.log('Functionality to add an employee');
-    showMainMenu();
+    const roles = await executeQuery(`SELECT id, title FROM role`);
+    const roleChoices = roles.map(({ id, title }) => ({
+        name: title,
+        value: id
+    }));
+
+    const { firstName, lastName, roleId, managerId } = await inquirer.prompt([
+        {
+            name: 'firstName',
+            type: 'input',
+            message: 'Enter the employee\'s first name:',
+        },
+        {
+            name: 'lastName',
+            type: 'input',
+            message: 'Enter the employee\'s last name:',
+        },
+        {
+            name: 'roleId',
+            type: 'list',
+            message: 'Choose the employee\'s role:',
+            choices: roleChoices
+        },
+        {
+            name: 'managerId',
+            type: 'input',
+            message: 'Enter the manager ID (leave blank if none):',
+            default: null,
+            validate: value => !isNaN(parseInt(value)) || value === null ? true : 'Please enter a valid number or leave blank'
+        }
+    ]);
+
+    const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+    try {
+        await executeQuery(sql, [firstName, lastName, roleId, managerId]);
+        console.log(`Added employee ${firstName} ${lastName} to the database`);
+    } catch (error) {
+        console.error('Error adding employee:', error);
+    } finally {
+        showMainMenu();
+    }
 }
+
 
 async function updateEmployeeRole() {
     console.log('Functionality to update an employee role');
