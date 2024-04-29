@@ -136,16 +136,6 @@ async function viewAllEmployees() {
     showMainMenu();
 }
 
-async function addDepartment() {
-    console.log('Functionality to add a department');
-    showMainMenu();
-}
-
-async function addRole() {
-    console.log('Functionality to add a role');
-    showMainMenu();
-}
-
 async function addEmployee() {
     console.log('Functionality to add an employee');
     showMainMenu();
