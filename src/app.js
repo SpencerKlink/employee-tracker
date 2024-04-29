@@ -140,7 +140,24 @@ async function viewAllRoles() {
 }
 
 async function viewAllEmployees() {
-    const sql = `SELECT id, first_name, last_name, role_id, manager_id FROM employee`;
+    const sql = `
+        SELECT 
+            e.id, 
+            e.first_name, 
+            e.last_name, 
+            r.title AS role, 
+            r.salary, 
+            d.name AS department, 
+            CONCAT(m.first_name, ' ', m.last_name) AS manager 
+        FROM 
+            employee e
+        INNER JOIN 
+            role r ON e.role_id = r.id
+        INNER JOIN 
+            department d ON r.department_id = d.id
+        LEFT JOIN 
+            employee m ON e.manager_id = m.id
+    `;
     try {
         const employees = await executeQuery(sql);
         console.log("\nEmployees:");
@@ -151,6 +168,7 @@ async function viewAllEmployees() {
         showMainMenu();
     }
 }
+
 
 async function addEmployee() {
     const roles = await executeQuery(`SELECT id, title FROM role`);
@@ -196,10 +214,43 @@ async function addEmployee() {
     }
 }
 
-
 async function updateEmployeeRole() {
-    console.log('Functionality to update an employee role');
-    showMainMenu();
+    const employees = await executeQuery(`SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee`);
+    const employeeChoices = employees.map(({ id, name }) => ({
+        name: name,
+        value: id
+    }));
+
+    const roles = await executeQuery(`SELECT id, title FROM role`);
+    const roleChoices = roles.map(({ id, title }) => ({
+        name: title,
+        value: id
+    }));
+
+    const { employeeId, roleId } = await inquirer.prompt([
+        {
+            name: 'employeeId',
+            type: 'list',
+            message: 'Choose the employee to update:',
+            choices: employeeChoices
+        },
+        {
+            name: 'roleId',
+            type: 'list',
+            message: 'Choose the new role for the employee:',
+            choices: roleChoices
+        }
+    ]);
+
+    const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+    try {
+        await executeQuery(sql, [roleId, employeeId]);
+        console.log(`Updated employee's role successfully`);
+    } catch (error) {
+        console.error('Error updating employee role:', error);
+    } finally {
+        showMainMenu();
+    }
 }
 
 startApp();
