@@ -171,42 +171,46 @@ async function viewAllEmployees() {
 
 
 async function addEmployee() {
-    const roles = await executeQuery(`SELECT id, title FROM role`);
-    const roleChoices = roles.map(({ id, title }) => ({
-        name: title,
-        value: id
-    }));
+    console.log('Adding an employee...');
 
-    const { firstName, lastName, roleId, managerId } = await inquirer.prompt([
+    // Prompt for employee details
+    const { firstName, lastName, roleId, managerName } = await inquirer.prompt([
         {
             name: 'firstName',
             type: 'input',
-            message: 'Enter the employee\'s first name:',
+            message: "Enter the employee's first name:",
         },
         {
             name: 'lastName',
             type: 'input',
-            message: 'Enter the employee\'s last name:',
+            message: "Enter the employee's last name:",
         },
         {
             name: 'roleId',
-            type: 'list',
-            message: 'Choose the employee\'s role:',
-            choices: roleChoices
+            type: 'input',
+            message: "Enter the employee's role ID:",
         },
         {
-            name: 'managerId',
+            name: 'managerName',
             type: 'input',
-            message: 'Enter the manager ID (leave blank if none):',
-            default: null,
-            validate: value => !isNaN(parseInt(value)) || value === null ? true : 'Please enter a valid number or leave blank'
-        }
+            message: "Enter the employee's manager's name:",
+        },
     ]);
 
-    const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+    const managerQuery = `SELECT id FROM employee WHERE CONCAT(first_name, ' ', last_name) = ?`;
+    const [manager] = await executeQuery(managerQuery, [managerName]);
+    
+    if (!manager) {
+        console.log(`Manager '${managerName}' not found.`);
+        return;
+    }
+
+    const managerId = manager.id;
+
+    const insertQuery = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
     try {
-        await executeQuery(sql, [firstName, lastName, roleId, managerId]);
-        console.log(`Added employee ${firstName} ${lastName} to the database`);
+        await executeQuery(insertQuery, [firstName, lastName, roleId, managerId]);
+        console.log(`Employee '${firstName} ${lastName}' added successfully.`);
     } catch (error) {
         console.error('Error adding employee:', error);
     } finally {
