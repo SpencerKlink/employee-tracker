@@ -29,3 +29,6 @@ The project uses a MySQL database with the following schema:
 - `role` table: id, title, salary, department_id
 - `employee` table: id, first_name, last_name, role_id, manager_id
 
+# Google Drive Link
+https://drive.google.com/file/d/1mCjXcBC59Swjry3plTu6CSk3d0KHzCLs/view?usp=sharing
+
